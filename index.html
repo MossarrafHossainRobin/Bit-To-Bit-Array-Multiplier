@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced Binary Multiplier</title>
+    <!-- Google Fonts for more complex typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@300;400;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons (for input group icons) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ffe4e1, #ffb6c1);
+            min-height: 100vh;
+            font-family: 'Roboto', sans-serif; /* General body font */
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .navbar {
+            width: 100%;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .container {
+            max-width: 900px; /* Increased max-width */
+            background: white;
+            border-radius: 20px; /* More rounded corners */
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(255, 105, 135, 0.4); /* Stronger shadow */
+            transition: all 0.3s ease-in-out; /* Smooth transitions */
+            border: 1px solid rgba(255, 105, 135, 0.2);
+        }
+        .container:hover {
+            box-shadow: 0 15px 40px rgba(255, 105, 135, 0.6);
+            transform: translateY(-5px);
+        }
+        h1 {
+            color: #1e90ff; /* Dodger Blue */
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            font-family: 'Pacifico', cursive; /* Title font */
+            text-align: center;
+            font-size: 3rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #4CAF50; /* Green for section titles */
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        textarea {
+            font-family: 'Space Mono', monospace; /* Monospace for results */
+            white-space: pre-wrap;
+            height: 200px; /* Slightly taller */
+            resize: vertical; /* Allow vertical resizing */
+            background-color: #f8f9fa; /* Light grey background */
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            padding: 1rem;
+        }
+        .btn-group-custom .btn {
+            flex-grow: 1; /* Make buttons take equal width */
+            margin: 0.25rem; /* Small margin between buttons */
+            font-weight: 600;
+        }
+        /* Custom styles for button hover effects */
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3); }
+        .btn-info:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3); }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3); }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3); }
+        .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3); }
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            background-color: #f0f8ff; /* Light blue header */
+            border-bottom: 1px solid #e9ecef;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            font-weight: 600;
+            color: #343a40;
+            padding: 1rem 1.5rem;
+        }
+        .modal-body textarea {
+            min-height: 300px; /* Taller history modal textarea */
+        }
+        #logicDiagramCanvas {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            background-color: #f8f9fa;
+            width: 100%;
+            height: 500px;
+            cursor: grab;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-calculator-fill me-2"></i>Advanced Binary Multiplier
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#calculator-section">Calculator</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" id="calculator-section">
+        <h1><i class="bi bi-cpu me-2"></i>Binary Multiplier Simulator</h1>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="h5 mb-0">Input Decimal Numbers</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="decimalA" class="form-label">First Decimal Number:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-123"></i></span>
+                                <input type="number" class="form-control" id="decimalA" placeholder="e.g. 25" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="decimalB" class="form-label">Second Decimal Number:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-123"></i></span>
+                                <input type="number" class="form-control" id="decimalB" placeholder="e.g. 13" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4 btn-group-custom">
+                            <button class="btn btn-primary btn-lg" id="multiplyBtn"><i class="bi bi-calculator me-2"></i>Calculate Product</button>
+                            <button class="btn btn-info btn-lg" id="gateCountBtn"><i class="bi bi-bar-chart-fill me-2"></i>Show Gate Count</button>
+                            <button class="btn btn-success btn-lg" id="stepsBtn"><i class="bi bi-list-ol me-2"></i>Show Steps</button>
+                            <button class="btn btn-warning btn-lg" id="historyBtn"><i class="bi bi-clock-history me-2"></i>Show History</button>
+                            <button class="btn btn-danger btn-lg" id="clearBtn"><i class="bi bi-x-circle-fill me-2"></i>Clear All</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="resultTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="multiply-tab" data-bs-toggle="tab" data-bs-target="#multiply-pane" type="button" role="tab" aria-controls="multiply-pane" aria-selected="true">Result</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="gate-count-tab" data-bs-toggle="tab" data-bs-target="#gate-count-pane" type="button" role="tab" aria-controls="gate-count-pane" aria-selected="false">Gates</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="steps-tab" data-bs-toggle="tab" data-bs-target="#steps-pane" type="button" role="tab" aria-controls="steps-pane" aria-selected="false">Steps</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="diagram-tab" data-bs-toggle="tab" data-bs-target="#diagram-pane" type="button" role="tab" aria-controls="diagram-pane" aria-selected="false">Diagram</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="resultTabContent">
+                            <div class="tab-pane fade show active" id="multiply-pane" role="tabpanel" aria-labelledby="multiply-tab">
+                                <h5 class="card-title">Multiplication Result</h5>
+                                <textarea class="form-control" id="resultArea" readonly placeholder="Results will appear here..."></textarea>
+                            </div>
+                            <div class="tab-pane fade" id="gate-count-pane" role="tabpanel" aria-labelledby="gate-count-tab">
+                                <h5 class="card-title">Gate Count Analysis</h5>
+                                <textarea class="form-control" id="gateCountArea" readonly placeholder="Gate count details will appear here..."></textarea>
+                            </div>
+                            <div class="tab-pane fade" id="steps-pane" role="tabpanel" aria-labelledby="steps-tab">
+                                <h5 class="card-title">Step-by-Step Calculation</h5>
+                                <textarea class="form-control" id="stepsArea" readonly placeholder="Step-by-step breakdown will appear here..."></textarea>
+                            </div>
+                            <div class="tab-pane fade" id="diagram-pane" role="tabpanel" aria-labelledby="diagram-tab">
+                                <h5 class="card-title">Logic Diagram (Pan & Zoom)</h5>
+                                <canvas id="logicDiagramCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div
+        class="modal fade"
+        id="historyModal"
+        tabindex="-1"
+        aria-labelledby="historyModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-lg modal-dialog-scrollable"> <!-- Added scrollable for long history -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historyModalLabel"><i class="bi bi-clock-history me-2"></i>Calculation History</h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    ></button>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" id="historyArea" readonly placeholder="No calculations yet."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="clearHistoryBtn" class="btn btn-danger">
+                        <i class="bi bi-trash-fill me-2"></i>Clear History
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Your JavaScript goes here (or in a separate file) -->
+    <script>
+        (() => {
+            const decimalAInput = document.getElementById("decimalA");
+            const decimalBInput = document.getElementById("decimalB");
+            const resultArea = document.getElementById("resultArea");
+            const gateCountArea = document.getElementById("gateCountArea");
+            const stepsArea = document.getElementById("stepsArea");
+            const historyArea = document.getElementById("historyArea");
+            const logicDiagramCanvas = document.getElementById("logicDiagramCanvas");
+            const ctx = logicDiagramCanvas.getContext("2d");
+            const historyModal = new bootstrap.Modal(document.getElementById("historyModal"));
+            
+            let history = JSON.parse(localStorage.getItem('multiplierHistory')) || [];
+            let binA_global = "";
+            let binB_global = "";
+
+            // Diagram State for Pan & Zoom
+            const diagramState = {
+                scale: 1.0,
+                panX: 0,
+                panY: 0,
+                isPanning: false,
+                lastMouseX: 0,
+                lastMouseY: 0
+            };
+
+            // --- Helper Functions ---
+            function isValidDecimal(value) {
+                return /^-?\d+$/.test(value);
+            }
+
+            function decimalToBinary(num) {
+                return parseInt(Math.abs(num), 10).toString(2);
+            }
+
+            function multiplyBinaryWithSteps(binA, binB, originalA, originalB) {
+                let detailedSteps = `Multiplying absolute values:\nBinary A (Abs): ${binA}\nBinary B (Abs): ${binB}\n\n`;
+                const lenA = binA.length;
+                const lenB = binB.length;
+                
+                let partialProductsBinary = [];
+                let partialProductsDecimal = [];
+
+                detailedSteps += "--- Generating Partial Products (Unsigned) ---\n";
+                for (let i = 0; i < lenB; i++) {
+                    const currentBitB = binB[lenB - 1 - i];
+                    let partial = '';
+                    if (currentBitB === '1') {
+                        partial = binA + '0'.repeat(i);
+                    } else {
+                        partial = '0'.repeat(lenA) + '0'.repeat(i);
+                    }
+                    partialProductsBinary.push(partial);
+                    partialProductsDecimal.push(BigInt('0b' + partial));
+                    detailedSteps += `Bit ${lenB - 1 - i} of B ('${currentBitB}'): ${partial}\n`;
+                }
+
+                detailedSteps += "\n--- Summing Partial Products (Unsigned) ---\n";
+                let totalDecimalResultUnsigned = 0n;
+
+                const maxLen = partialProductsBinary.reduce((max, p) => Math.max(max, p.length), 0);
+                
+                partialProductsBinary.forEach(p => {
+                    const paddedP = '0'.repeat(maxLen - p.length) + p;
+                    detailedSteps += `  + ${paddedP}\n`;
+                });
+                detailedSteps += ` ${'-'.repeat(maxLen)}\n`;
+
+                for(let i=0; i < partialProductsDecimal.length; i++) {
+                    totalDecimalResultUnsigned += partialProductsDecimal[i];
+                }
+
+                const finalBinaryUnsigned = totalDecimalResultUnsigned.toString(2);
+                detailedSteps += `  = ${finalBinaryUnsigned} (Binary Unsigned)\n`;
+                detailedSteps += `  = ${totalDecimalResultUnsigned} (Decimal Unsigned)\n`;
+
+                const isResultNegative = (originalA < 0 && originalB > 0) || (originalA > 0 && originalB < 0);
+                let finalDecimalResult = isResultNegative ? -totalDecimalResultUnsigned : totalDecimalResultUnsigned;
+                
+                let finalBinarySignedDisplay = finalBinaryUnsigned;
+                if (isResultNegative) {
+                    finalBinarySignedDisplay = "-" + finalBinaryUnsigned; 
+                }
+
+                detailedSteps += `\n--- Final Signed Result ---\n`;
+                detailedSteps += `Sign consideration: ${isResultNegative ? 'Negative' : 'Positive'}\n`;
+                detailedSteps += `Final Binary Result (Display): ${finalBinarySignedDisplay}\n`;
+                detailedSteps += `Final Decimal Result: ${finalDecimalResult}`;
+
+                return { 
+                    binaryResult: finalBinarySignedDisplay, 
+                    decimalResult: finalDecimalResult.toString(), 
+                    detailedSteps: detailedSteps 
+                };
+            }
+
+            function generateGateImplementationDetails(binA, binB, isSigned) {
+                const lenA = binA.length;
+                const lenB = binB.length;
+
+                let output = `Logic Gate Implementation for an M x N Binary Multiplier (M=${lenA}, N=${lenB})\n\n`;
+
+                output += "Step 1: Partial Product Generation (AND Gates)\n";
+                const andGatesForPartialProducts = lenA * lenB;
+                output += `  - This stage multiplies each bit of the first number (A) with each bit of the second number (B).\n`;
+                output += `  - This requires a total of ${andGatesForPartialProducts} AND gates.\n`;
+                output += `  - Gate Count: 1 AND gate for each bit-pair (A_i * B_j).\n\n`;
+
+                output += "Step 2: Partial Product Summation (Half & Full Adders)\n";
+                output += `  - The partial products are summed together using a series of adders.\n`;
+                output += `  - We'll use a simple array multiplier model for this example.\n\n`;
+
+                output += "  - Adder Gate Breakdown:\n";
+                output += "    - A Half Adder (HA) adds two bits and produces a Sum and a Carry. It is made of:\n";
+                output += "      - 1 XOR Gate\n";
+                output += "      - 1 AND Gate\n";
+                output += "    - A Full Adder (FA) adds three bits (including a carry-in) and produces a Sum and a Carry-out. It is made of:\n";
+                output += "      - 2 XOR Gates\n";
+                output += "      - 2 AND Gates\n";
+                output += "      - 1 OR Gate\n\n";
+
+                let totalFullAdders = 0;
+                let totalHalfAdders = 0;
+                if (lenB > 1) {
+                    totalHalfAdders = lenA + (lenB - 2);
+                    totalFullAdders = (lenA-1) * (lenB-2) + (lenB-2);
+                }
+
+                const totalXorGates = (totalHalfAdders * 1) + (totalFullAdders * 2);
+                const totalAdderAndGates = (totalHalfAdders * 1) + (totalFullAdders * 2);
+                const totalOrGates = (totalFullAdders * 1);
+                
+                const totalAndGates = andGatesForPartialProducts + totalAdderAndGates;
+                const totalEstimatedGates = totalAndGates + totalXorGates + totalOrGates;
+
+                output += `  - Based on a conceptual array multiplier design, the summation requires:\n`;
+                output += `    - Half Adders: ${totalHalfAdders}\n`;
+                output += `    - Full Adders: ${totalFullAdders}\n`;
+                output += `  - Total Gates for Summation:\n`;
+                output += `    - XOR Gates: ${totalXorGates}\n`;
+                output += `    - AND Gates: ${totalAdderAndGates} (in adders only)\n`;
+                output += `    - OR Gates: ${totalOrGates}\n\n`;
+
+                output += `Total Estimated Gates:\n`;
+                output += `  - Total AND Gates: ${totalAndGates}\n`;
+                output += `  - Total XOR Gates: ${totalXorGates}\n`;
+                output += `  - Total OR Gates: ${totalOrGates}\n`;
+                output += `  - TOTAL: ${totalEstimatedGates}\n\n`;
+
+                if (isSigned) {
+                    output += `\n--- Note on Signed Multiplication ---\n`;
+                    output += `For signed multiplication, additional logic is needed. This might involve conditional negation using adders/subtractors or a more complex architecture like Booth's algorithm. This would significantly increase the total gate count and complexity beyond this basic estimation.\n`;
+                }
+
+                output += `\nNote: This is a simplified educational model. Actual hardware designs are optimized for speed and efficiency, and may use different adder types (e.g., carry-lookahead) or algorithms, resulting in a different gate count.\n`;
+
+                return output;
+            }
+
+            // --- Drawing Functions for Canvas ---
+
+            // Draw a basic AND gate symbol
+            function drawAndGate(x, y, label) {
+                const w = 40;
+                const h = 40;
+                ctx.beginPath();
+                ctx.moveTo(x - w / 2, y - h / 2);
+                ctx.lineTo(x - w / 2, y + h / 2);
+                ctx.lineTo(x, y + h / 2);
+                ctx.arc(x, y, h / 2, Math.PI / 2, -Math.PI / 2, false);
+                ctx.lineTo(x - w / 2, y - h / 2);
+                ctx.closePath();
+                ctx.fillStyle = '#ffc107';
+                ctx.fill();
+                ctx.strokeStyle = '#343a40';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = '#343a40';
+                ctx.font = '12px Roboto';
+                ctx.fillText(label, x, y);
+                return { x, y, w, h };
+            }
+
+            // Draw a Half Adder symbol
+            function drawHalfAdder(x, y, label) {
+                const w = 60;
+                const h = 40;
+                ctx.fillStyle = '#28a745';
+                ctx.fillRect(x - w/2, y - h/2, w, h);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x - w/2, y - h/2, w, h);
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Roboto';
+                ctx.fillText(label, x, y);
+                return { x, y, w, h };
+            }
+
+            // Draw a Full Adder symbol
+            function drawFullAdder(x, y, label) {
+                const w = 60;
+                const h = 40;
+                ctx.fillStyle = '#17a2b8';
+                ctx.fillRect(x - w/2, y - h/2, w, h);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x - w/2, y - h/2, w, h);
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Roboto';
+                ctx.fillText(label, x, y);
+                return { x, y, w, h };
+            }
+
+            // Draw a line with an arrowhead
+            function drawArrow(startX, startY, endX, endY, color) {
+                const headlen = 8; // length of head in pixels
+                const angle = Math.atan2(endY - startY, endX - startX);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(endX - headlen * Math.cos(angle - Math.PI / 6), endY - headlen * Math.sin(angle - Math.PI / 6));
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(endX - headlen * Math.cos(angle + Math.PI / 6), endY - headlen * Math.sin(angle + Math.PI / 6));
+                ctx.stroke();
+            }
+
+            // The main drawing function
+            function drawLogicDiagram(binA, binB) {
+                const M = binA.length;
+                const N = binB.length;
+                
+                logicDiagramCanvas.width = logicDiagramCanvas.parentElement.offsetWidth;
+                const requiredHeight = (N+1) * 70 + (M-1) * 20;
+                logicDiagramCanvas.height = Math.max(500, requiredHeight);
+
+                ctx.save();
+                ctx.clearRect(0, 0, logicDiagramCanvas.width, logicDiagramCanvas.height);
+                ctx.translate(diagramState.panX, diagramState.panY);
+                ctx.scale(diagramState.scale, diagramState.scale);
+                
+                ctx.font = '14px Space Mono';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.lineWidth = 1;
+
+                const SPACING = 60;
+                const ORIGIN_X = logicDiagramCanvas.width / 2 - (M * SPACING) / 2;
+                const ORIGIN_Y = 50;
+
+                const andGateOutputs = [];
+                const adderOutputs = [];
+
+                // 1. Draw inputs and AND gates for partial products
+                // Draw A bits
+                for (let i = 0; i < M; i++) {
+                    const x = ORIGIN_X + i * SPACING;
+                    ctx.fillStyle = '#1e90ff';
+                    ctx.fillText(`A${M - 1 - i}`, x, ORIGIN_Y - 20);
+                }
+                // Draw B bits
+                for (let j = 0; j < N; j++) {
+                    const y = ORIGIN_Y + j * (SPACING + 10);
+                    ctx.fillStyle = '#4CAF50';
+                    ctx.fillText(`B${N - 1 - j}`, ORIGIN_X - 40, y + SPACING/2);
+                }
+
+                // Draw AND gates
+                for (let j = 0; j < N; j++) {
+                    const partialProductRow = [];
+                    for (let i = 0; i < M; i++) {
+                        const x = ORIGIN_X + i * SPACING + j * (SPACING / 3);
+                        const y = ORIGIN_Y + j * (SPACING + 10);
+                        const gate = drawAndGate(x, y + SPACING, `P${i+j}`);
+                        partialProductRow.push(gate);
+                        
+                        // Draw wires from inputs to AND gates
+                        drawArrow(ORIGIN_X + i * SPACING, ORIGIN_Y, gate.x, gate.y - gate.h / 2, '#1e90ff');
+                        drawArrow(ORIGIN_X - 40, y + SPACING/2, gate.x - gate.w/2, gate.y, '#4CAF50');
+                    }
+                    andGateOutputs.push(partialProductRow);
+                }
+
+                // 2. Draw adders for summation
+                let currentY = ORIGIN_Y + (N-1) * (SPACING + 10) + SPACING + SPACING;
+                
+                let previousRowOutputs = andGateOutputs[0].map(gate => ({ x: gate.x, y: gate.y + gate.h/2 }));
+                adderOutputs.push(previousRowOutputs);
+                
+                for (let j = 1; j < N; j++) {
+                    const currentRowOutputs = [];
+                    const andGateRow = andGateOutputs[j];
+                    const prevAdderRow = adderOutputs[j-1];
+
+                    // First element is a Half Adder
+                    let x = prevAdderRow[0].x;
+                    let y = currentY;
+                    let ha = drawHalfAdder(x, y, `HA`);
+                    currentRowOutputs.push({ x: ha.x + ha.w/2, y: ha.y + ha.h/2 });
+                    drawArrow(prevAdderRow[0].x, prevAdderRow[0].y, ha.x-ha.w/2, ha.y, '#343a40');
+                    drawArrow(andGateRow[0].x, andGateRow[0].y + andGateRow[0].h/2, ha.x, ha.y - ha.h/2, '#343a40');
+
+                    for (let i = 1; i < M + j; i++) {
+                        x = prevAdderRow[i].x;
+                        y = currentY;
+                        let fa = drawFullAdder(x, y, `FA`);
+                        currentRowOutputs.push({ x: fa.x + fa.w/2, y: fa.y + fa.h/2 });
+
+                        drawArrow(prevAdderRow[i].x, prevAdderRow[i].y, fa.x-fa.w/2, fa.y, '#343a40'); // from prev row sum
+                        drawArrow(prevAdderRow[i-1].x + prevAdderRow[i-1].w/2, prevAdderRow[i-1].y + prevAdderRow[i-1].h/2, fa.x-fa.w/2, fa.y - 10, '#343a40'); // from prev carry
+                        if(i < andGateRow.length) {
+                             drawArrow(andGateRow[i].x, andGateRow[i].y + andGateRow[i].h/2, fa.x, fa.y - fa.h/2, '#343a40');
+                        }
+                    }
+                    adderOutputs.push(currentRowOutputs);
+                    currentY += SPACING;
+                }
+                
+                // Draw final result bits
+                const lastAdderRow = adderOutputs[adderOutputs.length - 1];
+                for(let i=0; i < lastAdderRow.length; i++) {
+                     const x = lastAdderRow[i].x;
+                     const y = lastAdderRow[i].y + 20;
+                     ctx.fillStyle = '#007bff';
+                     drawArrow(lastAdderRow[i].x, lastAdderRow[i].y, x, y - 10, '#007bff');
+                     ctx.fillText(`S${i}`, x, y);
+                }
+
+                ctx.restore();
+            }
+
+            // --- Event Handlers for Pan and Zoom ---
+            function handleMouseDown(e) {
+                e.preventDefault();
+                diagramState.isPanning = true;
+                diagramState.lastMouseX = e.clientX;
+                diagramState.lastMouseY = e.clientY;
+                logicDiagramCanvas.style.cursor = 'grabbing';
+            }
+
+            function handleMouseMove(e) {
+                if (!diagramState.isPanning) return;
+                const dx = e.clientX - diagramState.lastMouseX;
+                const dy = e.clientY - diagramState.lastMouseY;
+                diagramState.panX += dx;
+                diagramState.panY += dy;
+                diagramState.lastMouseX = e.clientX;
+                diagramState.lastMouseY = e.clientY;
+                drawLogicDiagram(binA_global, binB_global);
+            }
+
+            function handleMouseUp() {
+                diagramState.isPanning = false;
+                logicDiagramCanvas.style.cursor = 'grab';
+            }
+
+            function handleWheel(e) {
+                e.preventDefault();
+                const scaleFactor = 1.1;
+                const rect = logicDiagramCanvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                const oldScale = diagramState.scale;
+                if (e.deltaY < 0) {
+                    diagramState.scale *= scaleFactor;
+                } else {
+                    diagramState.scale /= scaleFactor;
+                }
+                diagramState.scale = Math.max(0.2, Math.min(3.0, diagramState.scale));
+
+                const newMouseX = (mouseX - diagramState.panX) / oldScale;
+                const newMouseY = (mouseY - diagramState.panY) / oldScale;
+
+                diagramState.panX -= newMouseX * (diagramState.scale - oldScale);
+                diagramState.panY -= newMouseY * (diagramState.scale - oldScale);
+
+                drawLogicDiagram(binA_global, binB_global);
+            }
+
+            function addHistory(entry) {
+                history.unshift(entry);
+                if (history.length > 20) {
+                    history.pop();
+                }
+                localStorage.setItem('multiplierHistory', JSON.stringify(history));
+            }
+
+            function showHistoryContent() {
+                if (history.length === 0) {
+                    historyArea.value = "No calculations yet.";
+                } else {
+                    historyArea.value = history.join("\n\n---\n\n");
+                }
+            }
+
+            function clearHistory() {
+                history = [];
+                localStorage.removeItem('multiplierHistory');
+                historyArea.value = "History cleared.";
+            }
+
+            // --- Event Listeners ---
+            document.getElementById("multiplyBtn").addEventListener("click", () => {
+                const aStr = decimalAInput.value.trim();
+                const bStr = decimalBInput.value.trim();
+
+                if (!isValidDecimal(aStr) || !isValidDecimal(bStr)) {
+                    console.error("Please enter valid integer numbers (positive or negative).");
+                    return;
+                }
+
+                const a = parseInt(aStr, 10);
+                const b = parseInt(bStr, 10);
+
+                binA_global = decimalToBinary(a);
+                binB_global = decimalToBinary(b);
+
+                const isResultNegative = (a < 0 && b > 0) || (a > 0 && b < 0);
+                const isEitherZero = (a === 0 || b === 0);
+
+                let binaryResultDisplay, decimalResultDisplay, detailedStepsContent, gateCountContent;
+
+                if (isEitherZero) {
+                    binaryResultDisplay = '0';
+                    decimalResultDisplay = '0';
+                    detailedStepsContent = `Multiplication by zero results in zero.\nAny number (Decimal ${a}) x Zero (Decimal ${b}) = 0`;
+                    gateCountContent = "Gate count is minimal for multiplication by zero.";
+                    const canvas = logicDiagramCanvas;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                } else {
+                    const result = multiplyBinaryWithSteps(binA_global, binB_global, a, b);
+                    binaryResultDisplay = result.binaryResult;
+                    decimalResultDisplay = result.decimalResult;
+                    detailedStepsContent = result.detailedSteps;
+                    gateCountContent = generateGateImplementationDetails(binA_global, binB_global, isResultNegative);
+                }
+
+                resultArea.value =
+                    `Decimal A: ${aStr}\n` +
+                    `Decimal B: ${bStr}\n\n` +
+                    `Binary A (Abs): ${binA_global}\n` +
+                    `Binary B (Abs): ${binB_global}\n\n` +
+                    `Binary Product (Display): ${binaryResultDisplay}\n` +
+                    `Decimal Product: ${decimalResultDisplay}`;
+                
+                new bootstrap.Tab(document.getElementById('multiply-tab')).show();
+                stepsArea.value = detailedStepsContent;
+                gateCountArea.value = gateCountContent;
+
+                addHistory(`[${new Date().toLocaleString()}]\nA: ${aStr}, B: ${bStr} => Result: ${decimalResultDisplay} (${binaryResultDisplay})`);
+            });
+
+            document.getElementById("gateCountBtn").addEventListener("click", () => {
+                const aStr = decimalAInput.value.trim();
+                const bStr = decimalBInput.value.trim();
+
+                if (!isValidDecimal(aStr) || !isValidDecimal(bStr)) {
+                    console.error("Please enter valid integer numbers (positive or negative).");
+                    return;
+                }
+                const a = parseInt(aStr, 10);
+                const b = parseInt(bStr, 10);
+
+                binA_global = decimalToBinary(a);
+                binB_global = decimalToBinary(b);
+                const isResultNegative = (a < 0 && b > 0) || (a > 0 && b < 0);
+                const isEitherZero = (a === 0 || b === 0);
+
+                if (isEitherZero) {
+                    gateCountArea.value = "Gate count is minimal for multiplication by zero.";
+                } else {
+                    gateCountArea.value = generateGateImplementationDetails(binA_global, binB_global, isResultNegative);
+                }
+                
+                const gateCountTab = new bootstrap.Tab(document.getElementById('gate-count-tab'));
+                gateCountTab.show();
+            });
+
+            document.getElementById("stepsBtn").addEventListener("click", () => {
+                const aStr = decimalAInput.value.trim();
+                const bStr = decimalBInput.value.trim();
+
+                if (!isValidDecimal(aStr) || !isValidDecimal(bStr)) {
+                    console.error("Please enter valid integer numbers (positive or negative).");
+                    return;
+                }
+                const a = parseInt(aStr, 10);
+                const b = parseInt(bStr, 10);
+
+                binA_global = decimalToBinary(a);
+                binB_global = decimalToBinary(b);
+                const isResultNegative = (a < 0 && b > 0) || (a > 0 && b < 0);
+                const isEitherZero = (a === 0 || b === 0);
+
+                if (isEitherZero) {
+                    stepsArea.value = `Multiplication by zero results in zero.\nAny number (Decimal ${a}) x Zero (Decimal ${b}) = 0`;
+                } else {
+                    const { detailedSteps } = multiplyBinaryWithSteps(binA_global, binB_global, a, b);
+                    stepsArea.value = detailedSteps;
+                }
+                
+                const stepsTab = new bootstrap.Tab(document.getElementById('steps-tab'));
+                stepsTab.show();
+            });
+            
+            document.getElementById("diagram-tab").addEventListener("click", () => {
+                const aStr = decimalAInput.value.trim();
+                const bStr = decimalBInput.value.trim();
+                if (!isValidDecimal(aStr) || !isValidDecimal(bStr) || aStr === "0" || bStr === "0") {
+                    const canvas = logicDiagramCanvas;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    return;
+                }
+                drawLogicDiagram(binA_global, binB_global);
+            });
+
+            document.getElementById("clearBtn").addEventListener("click", () => {
+                decimalAInput.value = "";
+                decimalBInput.value = "";
+                resultArea.value = "";
+                gateCountArea.value = "";
+                stepsArea.value = "";
+                binA_global = "";
+                binB_global = "";
+                const canvas = logicDiagramCanvas;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                new bootstrap.Tab(document.getElementById('multiply-tab')).show();
+            });
+
+            document.getElementById("historyBtn").addEventListener("click", () => {
+                showHistoryContent();
+                historyModal.show();
+            });
+
+            document.getElementById("clearHistoryBtn").addEventListener("click", () => {
+                clearHistory();
+            });
+
+            document.getElementById("historyModal").addEventListener("show.bs.modal", showHistoryContent);
+            
+            // Add event listeners for pan and zoom
+            logicDiagramCanvas.addEventListener('mousedown', handleMouseDown);
+            logicDiagramCanvas.addEventListener('mousemove', handleMouseMove);
+            logicDiagramCanvas.addEventListener('mouseup', handleMouseUp);
+            logicDiagramCanvas.addEventListener('wheel', handleWheel);
+
+            window.addEventListener('load', () => {
+                decimalAInput.value = "";
+                decimalBInput.value = "";
+                resultArea.value = "";
+                gateCountArea.value = "";
+                stepsArea.value = "";
+                binA_global = "";
+                binB_global = "";
+                const canvas = logicDiagramCanvas;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+            
+            window.addEventListener('resize', () => {
+                if (document.getElementById('diagram-tab').classList.contains('active')) {
+                    if (binA_global && binB_global) {
+                        drawLogicDiagram(binA_global, binB_global);
+                    }
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
